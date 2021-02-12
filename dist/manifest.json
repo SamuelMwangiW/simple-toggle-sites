@@ -1,7 +1,7 @@
 {
-    "name": "Simple Toggle Sites",
+    "name": "Simple Ad Blocker",
     "version": "1.0.0",
-    "description": "A very basic extension to quickly block or allow a list of websites.",
+    "description": "A very basic extension to quickly block or allow a list of websites inspired by Andrew Schmelyun.",
     "permissions": [
         "storage",
         "webRequest",
