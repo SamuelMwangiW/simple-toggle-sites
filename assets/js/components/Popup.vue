@@ -7,7 +7,7 @@
         </div>
         <div class="sites">
             <p>List your websites below, one per line</p>
-            <textarea rows="8" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-model="list"></textarea>
+            <textarea rows="8" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" v-model="blockList"></textarea>
         </div>
         <button type="button" class="state-save" @click="saveList">Save Site List</button>
     </div>
@@ -17,7 +17,7 @@ export default {
     data() {
         return {
             active: true,
-            list: "example.com",
+            blockList: "example.com",
             icons: {
                 active: 'images/icon-48x48.png',
                 inactive: 'images/icon-48x48-off.png'
@@ -25,9 +25,9 @@ export default {
         }
     },
     created() {
-        chrome.storage.sync.get(['toggleSitesActive', 'toggleSitesList'], (result) => {
+        chrome.storage.sync.get(['toggleSitesActive', 'toggleSitesBlockList'], (result) => {
             this.active = result.toggleSitesActive;
-            this.list = result.toggleSitesList;
+            this.blockList = result.toggleSitesBlockList;
         });
     },
     methods: {
@@ -43,7 +43,7 @@ export default {
         },
         saveList() {
             chrome.storage.sync.set({
-                toggleSitesList: this.list
+                toggleSitesBlockList: this.blockList
             }, () => {});
         }
     }

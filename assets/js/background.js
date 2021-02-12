@@ -2,23 +2,23 @@
 chrome.runtime.onInstalled.addListener(function() {
     chrome.storage.sync.set({
         toggleSitesActive: false,
-        toggleSitesList: 'example.com'
+        toggleSitesBlockList: 'example.com'
     }, function() {});
 });
 
 // set up initial chrome storage values
 var toggleSitesActive = false;
-var toggleSitesList = 'example.com';
+var toggleSitesBlockList = 'example.com';
 
 chrome.storage.sync.get([
     'toggleSitesActive',
-    'toggleSitesList'
+    'toggleSitesBlockList'
 ], function(result) {
     toggleSitesActive = result.toggleSitesActive;
-    toggleSitesList = result.toggleSitesList;
+    toggleSitesBlockList = result.toggleSitesBlockList;
 });
 
-// on each site request, block if it's in toggleSitesList
+// on each site request, block if it's in toggleSitesBlockList
 chrome.webRequest.onBeforeRequest.addListener(
     function(details) {
         // if the toggle is inactive, don't block anything
@@ -26,8 +26,8 @@ chrome.webRequest.onBeforeRequest.addListener(
             return { cancel: false };
         }
 
-        // determine if the url is in toggleSitesList
-        var cancel = toggleSitesList.split(/\n/)
+        // determine if the url is in toggleSitesBlockList
+        var cancel = toggleSitesBlockList.split(/\n/)
             .some(site => {
                 var url = new URL(details.url);
 
@@ -50,8 +50,8 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
         if (changes.toggleSitesActive) {
             toggleSitesActive = changes.toggleSitesActive.newValue;
         }
-        if (changes.toggleSitesList) {
-            toggleSitesList = changes.toggleSitesList.newValue;
+        if (changes.toggleSitesBlockList) {
+            toggleSitesBlockList = changes.toggleSitesBlockList.newValue;
         }
     }
 });
