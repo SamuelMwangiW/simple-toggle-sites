@@ -1,14 +1,14 @@
 // when the extension is first installed, set default values
 chrome.runtime.onInstalled.addListener(function() {
     chrome.storage.sync.set({
-        toggleSitesActive: false,
+        toggleSitesActive: true,
         toggleSitesBlockList: 'example.com',
         toggleSitesAllowList: 'example.org',
     }, function() {});
 });
 
 // set up initial chrome storage values
-var toggleSitesActive = false;
+var toggleSitesActive = true;
 var toggleSitesBlockList = 'example.com';
 var toggleSitesAllowList = 'example.org';
 
