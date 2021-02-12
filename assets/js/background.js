@@ -1,5 +1,13 @@
 // when the extension is first installed, set default values
 chrome.runtime.onInstalled.addListener(function() {
+    fetch("http://localhost:8080/hosts.json")
+        .then((resp) => resp.json())
+        .then(function (data) {
+            chrome.storage.local.set({
+                defaultBlockedList: data
+            }, function (){});
+        });
+
     chrome.storage.sync.set({
         toggleSitesActive: true,
         toggleSitesBlockList: 'example.com',
@@ -8,9 +16,10 @@ chrome.runtime.onInstalled.addListener(function() {
 });
 
 // set up initial chrome storage values
-var toggleSitesActive = true;
-var toggleSitesBlockList = 'example.com';
-var toggleSitesAllowList = 'example.org';
+let toggleSitesActive = true;
+let toggleSitesBlockList = 'example.com';
+let toggleSitesAllowList = 'example.org';
+let defaultBlockedList = [];
 
 chrome.storage.sync.get([
     'toggleSitesActive',
@@ -20,6 +29,9 @@ chrome.storage.sync.get([
     toggleSitesActive = result.toggleSitesActive;
     toggleSitesBlockList = result.toggleSitesBlockList;
     toggleSitesAllowList = result.toggleSitesAllowList;
+});
+chrome.storage.local.get(['defaultBlockedList'], function (result){
+    defaultBlockedList = result.defaultBlockedList;
 });
 
 // on each site request, block if it's in toggleSitesBlockList
@@ -31,22 +43,21 @@ chrome.webRequest.onBeforeRequest.addListener(
         }
 
         // determine if the url is in toggleSitesBlockList
-        var allowed = toggleSitesAllowList.split(/\n/)
+        const allowed = toggleSitesAllowList.split(/\n/)
             .some(site => {
                 var url = new URL(details.url);
-                return Boolean(url.hostname.indexOf(site) !== -1);
+                return Boolean(url.hostname.indexOf(site) === 0);
             });
 
         if(toggleSitesAllowList.length && allowed){
             return { cancel: false };
         }
 
-        var cancel = toggleSitesBlockList.split(/\n/)
-            .some(site => {
-                var url = new URL(details.url);
-
-                return Boolean(url.hostname.indexOf(site) !== -1);
-            });
+        let combinedList = [...defaultBlockedList, ...toggleSitesBlockList.split(/\n/)];
+        const cancel = combinedList.some(site => {
+            const url = new URL(details.url);
+            return Boolean(url.hostname.indexOf(site) === 0);
+        });
 
         return { cancel: cancel };
     },
