@@ -2,20 +2,24 @@
 chrome.runtime.onInstalled.addListener(function() {
     chrome.storage.sync.set({
         toggleSitesActive: false,
-        toggleSitesBlockList: 'example.com'
+        toggleSitesBlockList: 'example.com',
+        toggleSitesAllowList: 'example.org',
     }, function() {});
 });
 
 // set up initial chrome storage values
 var toggleSitesActive = false;
 var toggleSitesBlockList = 'example.com';
+var toggleSitesAllowList = 'example.org';
 
 chrome.storage.sync.get([
     'toggleSitesActive',
-    'toggleSitesBlockList'
+    'toggleSitesBlockList',
+    'toggleSitesAllowList'
 ], function(result) {
     toggleSitesActive = result.toggleSitesActive;
     toggleSitesBlockList = result.toggleSitesBlockList;
+    toggleSitesAllowList = result.toggleSitesAllowList;
 });
 
 // on each site request, block if it's in toggleSitesBlockList
@@ -27,6 +31,16 @@ chrome.webRequest.onBeforeRequest.addListener(
         }
 
         // determine if the url is in toggleSitesBlockList
+        var allowed = toggleSitesAllowList.split(/\n/)
+            .some(site => {
+                var url = new URL(details.url);
+                return Boolean(url.hostname.indexOf(site) !== -1);
+            });
+
+        if(toggleSitesAllowList.length && allowed){
+            return { cancel: false };
+        }
+
         var cancel = toggleSitesBlockList.split(/\n/)
             .some(site => {
                 var url = new URL(details.url);
@@ -52,6 +66,9 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
         }
         if (changes.toggleSitesBlockList) {
             toggleSitesBlockList = changes.toggleSitesBlockList.newValue;
+        }
+        if (changes.toggleSitesAllowList) {
+            toggleSitesAllowList = changes.toggleSitesAllowList.newValue;
         }
     }
 });
